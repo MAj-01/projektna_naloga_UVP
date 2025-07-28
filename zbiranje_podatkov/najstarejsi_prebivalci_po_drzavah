@@ -4,9 +4,37 @@ import requests
 import re
 
 def podatki_o_najstarejsih_prebivalcih_po_drzavah():
-    url = https://en.wikipedia.org/wiki/List_of_the_oldest_people_by_country
+    url = 'https://en.wikipedia.org/wiki/List_of_the_oldest_people_by_country'
     prevzem = requests.gete(url)
     page_content = prevzem.text
 
     abs_path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(abs_path)
+    path = os.path.join(abs_path, "podatki", "nastarejsi_prebivalci_po_drzavah.html")
+    with open(path, 'w', encoding='utf-8') as file1:
+        file1.write(page_content)
+
+    # Sedaj moramo iz kode izlusciti le prvo tabelo na tej spletni strani. To bomo naredili z regularnimi izrazi.   
+ 
+    vzorec = r'<h2 id="Oldest_ever">Oldest ever</h2>([\s\S]*?)<h3 id="Territorial_and_overseas_regions_recordholders">Territorial and overseas regions recordholders</h3>'
+    path = os.path.join(abs_path, "podatki", "nastarejsi_prebivalci_po_drzavah_zozani_obseg.html")
+    match = re.search(vzorec, page_content)
+    novi_page_content = match.group(1)
+    vzorec_tabele = r'<table class="wikitable sortable">([\s\S]*?)</table>'
+    match_tabele = re.search(vzorec_tabele, novi_page_content)
+    novi_page_content_tabele = match_tabele.group(1)
+    with open(path, 'w', encoding='utf-8') as file2:
+        file2.write(novi_page_content_tabele)
+
+    # Sestavimo novi vzorec, ki bo zajel iz vsake vrstice določene podatke.
+
+    vrstice = re.findall(r'<tr>.*?</tr>', novi_page_content_tabele, flags=re.DOTALL)
+    drzava = None
+    for vrstica in vrstice:
+        if "Flag" in vrstica:
+            drzava = re.search(r'Flag_of_(\w+).svg.png"', vrstica)
+        spol = re.search(r'<div class="center">(.)</div></td>"', vrstica)
+        matches = re.findall(r'<td class="nowrap">(.*?)</td>', vrstica)
+        datum_rojstva = matches[0]
+        datum_smrti = matches[1]
+        leta = re.search(r'</span>(.*?)&nbsp;years', vrstica)
+        dnevi = re.search(r'years, (.*?)&nbsp;days', vrstica)
