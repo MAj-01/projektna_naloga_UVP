@@ -27,6 +27,7 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
 
     # Sestavimo novi vzorec, ki bo zajel iz vsake vrstice določene podatke.
 
+    seznam_slovarjev = []
     vrstice = re.findall(r'<tr>.*?</tr>', novi_page_content_tabele, flags=re.DOTALL)
     drzava = None
     for vrstica in vrstice:
@@ -38,3 +39,18 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
         datum_smrti = matches[1]
         leta = re.search(r'</span>(.*?)&nbsp;years', vrstica)
         dnevi = re.search(r'years, (.*?)&nbsp;days', vrstica)
+        seznam_slovarjev.append({'drzava': drzava.group(1), 'spol': spol.group(1), 'datum rojstva': datum_rojstva.group(1), 'datum smrti': datum_smrti.group(1), 'starost (leta)': leta.group(1), 'starost (dnevi)': dnevi.group(1)})
+        
+
+    # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
+
+    path = os.path.join(abs_path, "podatki", "nastarejsi_prebivalci_po_drzavah.csv")     
+    assert seznam_slovarjev and (all(j.keys() == seznam_slovarjev[0].keys() for j in seznam_slovarjev))
+    fieldnames = list(seznam_slovarjev[0].keys())
+
+    with open(path, 'w', encoding='utf-8', newline='') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for slovar in seznam_slovarjev:
+            writer.writerow(slovar)
+    
