@@ -5,52 +5,86 @@ import re
 
 def podatki_o_najstarejsih_prebivalcih_po_drzavah():
     url = 'https://en.wikipedia.org/wiki/List_of_the_oldest_people_by_country'
-    prevzem = requests.gete(url)
+    prevzem = requests.get(url)
     page_content = prevzem.text
 
     abs_path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(abs_path, "podatki", "nastarejsi_prebivalci_po_drzavah.html")
-    with open(path, 'w', encoding='utf-8') as file1:
-        file1.write(page_content)
+    folder_path = os.path.join(abs_path, "..", "podatki")
+    os.makedirs(folder_path, exist_ok=True)
+
+    html_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah.html")
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(page_content)
 
     # Sedaj moramo iz kode izlusciti le prvo tabelo na tej spletni strani. To bomo naredili z regularnimi izrazi.   
  
     vzorec = r'<h2 id="Oldest_ever">Oldest ever</h2>([\s\S]*?)<h3 id="Territorial_and_overseas_regions_recordholders">Territorial and overseas regions recordholders</h3>'
-    path = os.path.join(abs_path, "podatki", "nastarejsi_prebivalci_po_drzavah_zozani_obseg.html")
-    match = re.search(vzorec, page_content)
+    zozani_html_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah_zozani_obseg.html")
+    match = re.search(vzorec, page_content, re.DOTALL | re.IGNORECASE)
+
+    if not match:
+        raise ValueError("Vzorca ni bilo mogoče najti")
+    
     novi_page_content = match.group(1)
+
+
     vzorec_tabele = r'<table class="wikitable sortable">([\s\S]*?)</table>'
-    match_tabele = re.search(vzorec_tabele, novi_page_content)
-    novi_page_content_tabele = match_tabele.group(1)
-    with open(path, 'w', encoding='utf-8') as file2:
-        file2.write(novi_page_content_tabele)
+    match_tabele = re.search(vzorec_tabele, novi_page_content, re.DOTALL)
+
+    if not match_tabele:
+        raise ValueError("Tabele ni bilo mogoče najti")
+    
+    tabela_content = match_tabele.group(1)
+
+    tabela_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah_tabela.html")
+    with open(tabela_path, 'w', encoding='utf-8') as f:
+        f.write(tabela_content)
 
     # Sestavimo novi vzorec, ki bo zajel iz vsake vrstice določene podatke.
 
     seznam_slovarjev = []
-    vrstice = re.findall(r'<tr>.*?</tr>', novi_page_content_tabele, flags=re.DOTALL)
-    drzava = None
+    vrstice = re.findall(r'<tr>.*?</tr>', tabela_content, flags=re.DOTALL)[1:]
+    prejsnja_drzava = None
     for vrstica in vrstice:
-        if "Flag" in vrstica:
-            drzava = re.search(r'Flag_of_(\w+).svg.png"', vrstica)
+        # Drzavo iz vrstice lahko pridobimo le iz linka slike, ki predstavlja zastavo drzave.
+        drzava = re.search(r'Flag_of_(\w+).svg.png"', vrstica) if "Flag" in vrstica else prejsnja_drzava
+
         spol = re.search(r'<div class="center">(.)</div></td>"', vrstica)
-        matches = re.findall(r'<td class="nowrap">(.*?)</td>', vrstica)
-        datum_rojstva = matches[0]
-        datum_smrti = matches[1]
+
+        # Datum rojstva in datum smrti osebe je v html kodi strani zapisan zaporedoma pod istimi oznakami, 
+        # zato uporabimo re.findall, da poiscemo oba zadetka
+        datuma = re.findall(r'<td class="nowrap">(.*?)</td>', vrstica)
+        datum_rojstva = datuma[0] if len(datuma) > 0 else None
+        datum_smrti = datuma[1] if len(datuma) > 1 else None
+
+        # Starost
         leta = re.search(r'</span>(.*?)&nbsp;years', vrstica)
         dnevi = re.search(r'years, (.*?)&nbsp;days', vrstica)
-        seznam_slovarjev.append({'drzava': drzava.group(1), 'spol': spol.group(1), 'datum rojstva': datum_rojstva.group(1), 'datum smrti': datum_smrti.group(1), 'starost (leta)': leta.group(1), 'starost (dnevi)': dnevi.group(1)})
         
+        seznam_slovarjev.append({
+                'drzava': drzava,
+                'spol': spol,
+                'datum rojstva': datum_rojstva,
+                'datum smrti': datum_smrti,
+                'starost (leta)': leta,
+                'starost (dnevi)': dnevi
+            })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
 
-    path = os.path.join(abs_path, "podatki", "nastarejsi_prebivalci_po_drzavah.csv")     
-    assert seznam_slovarjev and (all(j.keys() == seznam_slovarjev[0].keys() for j in seznam_slovarjev))
-    fieldnames = list(seznam_slovarjev[0].keys())
+    csv_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah.csv")     
 
-    with open(path, 'w', encoding='utf-8', newline='') as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        writer.writeheader()
-        for slovar in seznam_slovarjev:
-            writer.writerow(slovar)
+    if seznam_slovarjev:
+        fieldnames = list(seznam_slovarjev[0].keys())
+        
+        with open(csv_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(seznam_slovarjev)
+        return f"Podatki shranjeni v {csv_path}"
+    else:
+        return "Ni podatkov za shranjevanje"        
+        
+if __name__ == '__main__':
+    podatki_o_najstarejsih_prebivalcih_po_drzavah()
     
