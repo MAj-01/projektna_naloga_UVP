@@ -47,7 +47,13 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
     prejsnja_drzava = None
     for vrstica in vrstice:
         # Drzavo iz vrstice lahko pridobimo le iz linka slike, ki predstavlja zastavo drzave.
-        drzava = re.search(r'px-Flag_of_([\s\S]*).svg.png"', vrstica) if "Flag_of_" in vrstica else prejsnja_drzava
+        drzava = re.search(r'</span><a href="/wiki/([\s\S]*?)" title="([\s\S]*?)">([\s\S]*?)</a></td>', vrstica) 
+        if "Flag_of_" in vrstica and re.findall(r'</span><a href="/wiki/([\s\S]*?)" title="([\s\S]*?)">([\s\S]*?)</a></td>', vrstica) == []:
+            drzava = re.search(r'<a href="/wiki/([\s\S]*?)" title="([\s\S]*?)"><img alt="([\s\S]*?)"', vrstica)
+        if drzava:
+            drzava = drzava.group(2)  
+        else:
+            drzava = prejsnja_drzava
         prejsnja_drzava = drzava 
 
         # Spol osebe je v vrsti zapisan v razdelku center, ki je v html kodi zapisan kot <div class="center">
@@ -55,17 +61,38 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
 
         # Datum rojstva in datum smrti osebe je v html kodi strani zapisan zaporedoma pod istimi oznakami, 
         # zato uporabimo re.findall, da poiscemo oba zadetka
-        datuma = re.findall(r'<td class="nowrap">(.*?)<', vrstica)
-        if len(datuma) == 1:
-            if "<td>Living</td>" in vrstica:
-                datum_rojstva = datuma[0]
+        st_znacka = re.findall(r'<td([\s\S]*?)</td>', vrstica)
+        datum_smrti = None
+        datum_rojstva = None
+        if len(st_znacka) >= 5:
+            if "nowrap" in vrstica:  # Preverimo v izvorni vrstici, ne v vsebini celice
+                match_rojstvo = re.search(r'class="nowrap">(.*?)<', st_znacka[-3])
+                if match_rojstvo:
+                    datum_rojstva = match_rojstvo.group(1)
+            
+            # Datum smrti - zadnji stolpec
+            if "Living" in st_znacka[-2]:
                 datum_smrti = "Living"
+            elif "reference" in st_znacka[-2]:
+                match_smrt = re.search(r'>(.*?)<sup', st_znacka[-2])
+                if match_smrt:
+                    datum_smrti = match_smrt.group(1)
             else:
-                datum_rojstva = datuma[0]
-                datum_smrti = re.search(r'<td>(.*?)<sup id="cite_ref-(\d*)" class="reference">', vrstica)
-        elif len(datuma) == 2:
-            datum_rojstva = datuma[0]
-            datum_smrti = datuma[1] 
+                # Če ni posebnih oznak, uporabimo celotno vsebino celice
+                datum_smrti = st_znacka[-2]
+        # if len(st_znacka) >= 5:
+        #     if "nowrap" in st_znacka[-3]:
+        #         datum_rojstva = re.search(r'<td class="nowrap">(.*?)<', st_znacka[-3])
+        #         # datum_rojstva = datum_rojstva.group(1)
+        #     elif "nowrap" in st_znacka[-2]:
+        #         datum_smrti = re.search(r'<td class="nowrap">(.*?)<', st_znacka[-2])
+        #         # datum_smrti = datum_smrti.group(1)
+        #     elif "reference" in st_znacka[-2]:
+        #         datum_smrti = re.search(r'<td>(.*?)<sup id="cite_ref-([\s\S]*?)" class="reference">', st_znacka[-2])
+        #         # datum_smrti = datum_smrti.group(1)
+        #     else:
+        #         datum_smrti = re.search(r'<td>(.*?)</td>', st_znacka[-2])
+        #         # datum_smrti = datum_smrti.group(1)
     
         # Starost
         if "<td>Living</td>" in vrstica:
@@ -76,12 +103,12 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
             dnevi = re.search(r'years, (.*?)&nbsp;days', vrstica)
         
         seznam_slovarjev.append({
-                'drzava': drzava.group(1) if drzava else prejsnja_drzava,
-                'spol': spol.group(1) if spol else None,
-                'datum rojstva': datum_rojstva,
-                'datum smrti': datum_smrti,
-                'starost (leta)': leta.group(1),
-                'starost (dnevi)': dnevi.group(1)
+                'Država': drzava,
+                'Spol': spol.group(1) if spol else None,
+                'Datum rojstva': datum_rojstva,
+                'Datum smrti': datum_smrti,
+                'Starost (leta)': leta.group(1),
+                'Starost (dnevi)': dnevi.group(1)
             })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
