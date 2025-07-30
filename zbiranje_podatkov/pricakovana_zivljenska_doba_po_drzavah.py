@@ -26,39 +26,37 @@ def podatki_o_pricakovani_zivljenski_dobi_po_drzavah():
     
     tabela_content = match_tabele.group(1)
 
-    tabela_path = os.path.join(folder_path, "pricakovana_zivljenska_doba_po_drzavah_tabela.html")
-    with open(tabela_path, 'w', encoding='utf-8') as f:
-        f.write(tabela_content)
 
     # Sestavimo novi vzorec, ki bo zajel iz vsake vrstice določene podatke.
 
     seznam_slovarjev = []
-    vrstice = re.findall(r'<tr id=(.*?)</tr>', tabela_content, flags=re.DOTALL)[1:]
+    vrstice = re.findall(r'<tr id=(.*?)</tr>', tabela_content, flags=re.DOTALL)
     for vrstica in vrstice:
         # Drzavo iz vrstice lahko pridobimo le iz linka slike, ki predstavlja zastavo drzave.
-        drzava = re.search(r'data-country="(\w)">(\w)</a>', vrstica) 
+        drzava = re.search(r'data-country="([\s\S]*?)">([\s\S]*?)</a>', vrstica) 
 
         # Pričakovana življenska doba - povprečje spolov.
-        pricakovana_zivljenska_doba = re.search(r'<td class="r">(\d+)</td>', vrstica)
+        pricakovana_zivljenska_doba = re.search(r'<td dir="ltr" class="px-2 border-e border-zinc-200 text-end py-1.5 border-b font-bold" data-order="([\s\S]*?)"> ([\s\S]*?) </td>', vrstica)
 
         # Pričakovana življenjska doba za ženske se pridobi iz istega vzorca.
-        pricakovana_zivljenska_doba_zenske = re.search(r'<td class="r">(\d+)</td>', vrstica, re.DOTALL)
+        pricakovana_zivljenska_doba_zenske = re.search(r'<td dir="ltr" class="px-2 border-e border-zinc-200 text-end py-1.5 border-b bg-fuchsia-100" data-order="([\s\S]*?)"> ([\s\S]*?) </td>', vrstica)
 
         # Pričakovana življenjska doba za moške se pridobi iz malo drugačnega vzorca, saj je razlika v barvi podatka.
-        pricakovana_zivljenska_doba_moski = re.search(r'<td class="r">(\d+)</td>', vrstica, re.DOTALL)
+        pricakovana_zivljenska_doba_moski = re.search(r'<td dir="ltr" class="px-2 border-e border-zinc-200 text-end py-1.5 border-b bg-cyan-100" data-order="([\s\S]*?)"> ([\s\S]*?) </td>', vrstica)
 
         seznam_slovarjev.append({
-                'drzava': drzava.group(2),
-                'spol': spol.group(1) if spol else None,
-                'datum rojstva': datum_rojstva,
-                'datum smrti': datum_smrti,
-                'starost (leta)': leta.group(1),
-                'starost (dnevi)': dnevi.group(1)
+                'Država': drzava.group(2),
+                'Pričakovana življenska doba': pricakovana_zivljenska_doba.group(2),
+                'Pričakovana življenska doba (ženske)': pricakovana_zivljenska_doba_zenske.group(2),
+                'Pričakovana življenska doba (moški)': pricakovana_zivljenska_doba_moski.group(2)
             })
+
+
+
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
 
-    csv_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah.csv")     
+    csv_path = os.path.join(folder_path, "pricakovana_zivljenska_doba_po_drzavah.csv")     
 
     if seznam_slovarjev:
         fieldnames = list(seznam_slovarjev[0].keys())
@@ -72,5 +70,5 @@ def podatki_o_pricakovani_zivljenski_dobi_po_drzavah():
         return "Ni podatkov za shranjevanje"        
         
 if __name__ == '__main__':
-    podatki_o_najstarejsih_prebivalcih_po_drzavah()
+    podatki_o_pricakovani_zivljenski_dobi_po_drzavah()
     
