@@ -37,18 +37,17 @@ def podatki_o_porabi_energije_po_drzavah():
         drzava = re.search(r'data-country="([\s\S]*?)">([\s\S]*?)</a>', vrstica) 
 
         # Dva podatka stas v enaki obliki značke, zato uporabimo nasledjo funkcijo.
-        dva_podatka = re.findall(r'data-order=(.*?)</td>', vrstica)
-        porabljena_energija = dva_podatka[0] 
-        porabljena_energija_na_prebivalca = dva_podatka[1]
+        porabljena_energija = re.search(r'</a> </td><td dir="ltr" class="px-2 border-e border-zinc-200 text-end py-1.5 border-b font-bold" data-order="(.*?)"> (.*?) </td>', vrstica) 
 
-        # Pričakovana življenska doba - povprečje spolov.
+        porabljena_energija_na_prebivalca = re.search(r'data-order="(.*?)"> (.*?) </td> </tr>', vrstica) 
+
         procent_porabe_enegije_na_drzavo = re.search(r'<td class="px-2 border-e border-zinc-200 text-end py-1.5 border-b font-bold"> (.*?) </td>', vrstica)
 
         seznam_slovarjev.append({
-                'Država': drzava.group(2),
+                'Država': drzava,
                 'Porabljena energija na državo (letno)': porabljena_energija.group(2),
-                'Procent porabe energije (svetovno)': procent_porabe_enegije_na_drzavo.group(1),
-                'Prorabljena energija na prebivalca (letno)': porabljena_energija_na_prebivalca.group(2)
+                'Procent porabe energije (svetovno)': procent_porabe_enegije_na_drzavo,
+                'Porabljena energija na prebivalca (letno)': porabljena_energija_na_prebivalca.group(2)
             })
 
 
