@@ -28,18 +28,29 @@ def podatki_o_kolicini_vode():
 
 
     # Sestavimo novi vzorec, ki bo zajel iz vsake vrstice določene podatke.
-
     seznam_slovarjev = []
     vrstice = re.findall(r'<tr>(.*?)</tr>', tabela_content, flags=re.DOTALL)
+    
+    def ocisti_podatek(podatek):
+        return re.sub(r'<.*?>', '', podatek).strip()
+    
     for vrstica in vrstice:
-        drzava = re.search(r'data-country="([\s\S]*?)">([\s\S]*?)</a>', vrstica) 
-        litri_vode_na_prebivalca = re.search(r'data-order="([\s\S]*?)"> ([\s\S]*?) <', vrstica) 
-
+        celice = re.findall(r'<td.*?>(.*?)</td>', vrstica, flags=re.DOTALL)
+        
+        # Preveri, ali ima vrstica dovolj celic
+        if len(celice) < 3:
+            continue  
+        
+        # Država (prva celica)
+        drzava = ocisti_podatek(celice[0])
+        
+        # Litri vode na prebivalca (tretja celica)
+        litri_vode_na_prebivalca = ocisti_podatek(celice[2])
+        
         seznam_slovarjev.append({
-                'Država': drzava.group(1),
-                'Porabljena količina vode na prebivalca (dnevno)': litri_vode_na_prebivalca.group(2)
-            })
-
+            'Država': drzava,
+            'Porabljena količina vode na prebivalca (dnevno)': litri_vode_na_prebivalca
+        })
 
 
 
