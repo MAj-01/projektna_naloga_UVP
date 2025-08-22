@@ -32,22 +32,37 @@ def podatki_o_porabi_energije_po_drzavah():
     seznam_slovarjev = []
     vrstice = re.findall(r'<tr>(.*?)</tr>', tabela_content, flags=re.DOTALL)
     
-    for vrstica in vrstice:
+    for vrstica in vrstice[1:]:
+        celice = re.findall(r'<td.*?>(.*?)</td>', vrstica, flags=re.DOTALL)
         # Drzavo iz vrstice lahko pridobimo le iz linka slike, ki predstavlja zastavo drzave.
-        drzava = re.search(r'data-country="([\s\S]*?)">([\s\S]*?)</a>', vrstica) 
+        def ocisti_podatek(podatek):
+            return re.sub(r'<.*?>', '', podatek).strip()
+        
+        # Država (običajno druga celica)
+        drzava = ocisti_podatek(celice[1])
+    
+        # Poraba energije (tretja celica)
+        poraba_energije = ocisti_podatek(celice[2])
+        
+        # Odstotek porabe energije (četrta celica)
+        odstotek_porabe = ocisti_podatek(celice[3])
+        
+        # Poraba energije na prebivalca (peta celica)
+        poraba_na_prebivalca = ocisti_podatek(celice[4])
 
-        # Dva podatka stas v enaki obliki značke, zato uporabimo nasledjo funkcijo.
-        porabljena_energija = re.search(r'</a> </td><td dir="ltr" class="px-2 border-e border-zinc-200 text-end py-1.5 border-b font-bold" data-order="(.*?)"> (.*?) </td>', vrstica) 
-
-        porabljena_energija_na_prebivalca = re.search(r'data-order="(.*?)"> (.*?) </td> </tr>', vrstica) 
-
-        procent_porabe_enegije_na_drzavo = re.search(r'<td class="px-2 border-e border-zinc-200 text-end py-1.5 border-b font-bold"> (.*?) </td>', vrstica)
+    
+        # drzava_match = re.search(r'data-country="(.*?)">(.*?)<', st_znack[1].group(2)) 
+        # drzava = drzava_match.group(2) if drzava_match else "Neznana država"
+# 
+        # porabljena_energija = st_znack[2].group(2)
+        # procent_porabe_enegije_na_drzavo = st_znack[3].group(2)
+        # porabljena_energija_na_prebivalca = st_znack[4].group(2)
 
         seznam_slovarjev.append({
                 'Država': drzava,
-                'Porabljena energija na državo (letno)': porabljena_energija.group(2),
-                'Procent porabe energije (svetovno)': procent_porabe_enegije_na_drzavo,
-                'Porabljena energija na prebivalca (letno)': porabljena_energija_na_prebivalca.group(2)
+                'Porabljena energija na državo (letno)': poraba_energije,
+                'Procent porabe energije (svetovno)': odstotek_porabe,
+                'Porabljena energija na prebivalca (letno)': poraba_na_prebivalca
             })
 
 
