@@ -19,22 +19,12 @@ def podatki_o_obnovljivi_energiji_po_drzavah():
     # Sedaj moramo iz kode izlusciti le prvo tabelo na tej spletni strani. To bomo naredili z regularnimi izrazi.   
  
     vzorec = r'<table([\s\S]*?)</table>'
-    zozani_html_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah_zozani_obseg.html")
-    match = re.search(vzorec, page_content, re.DOTALL | re.IGNORECASE)
+    match = re.findall(vzorec, page_content, re.DOTALL | re.IGNORECASE)
 
     if not match:
         raise ValueError("Vzorca ni bilo mogoče najti")
     
-    novi_page_content = match.group(1)
-
-
-    vzorec_tabele = r'<table class="wikitable sortable">([\s\S]*?)</table>'
-    match_tabele = re.search(vzorec_tabele, novi_page_content, re.DOTALL)
-
-    if not match_tabele:
-        raise ValueError("Tabele ni bilo mogoče najti")
-    
-    tabela_content = match_tabele.group(1)
+    tabela_content = match[2]
 
     tabela_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah_tabela.html")
     with open(tabela_path, 'w', encoding='utf-8') as f:
@@ -45,14 +35,17 @@ def podatki_o_obnovljivi_energiji_po_drzavah():
     seznam_slovarjev = []
     vrstice = re.findall(r'<tr.*?</tr>', tabela_content, flags=re.DOTALL)[1:]
     
-    for vrstica in vrstice:
+    def ocisti_podatek(podatek):
+        return re.sub(r'<.*?>', '', podatek).strip()
+
+    for vrstica in vrstice[1:]:
+        celice = re.findall(r'<td.*?>(.*?)</td>', vrstica, flags=re.DOTALL)
         # Drzavo iz vrstice lahko pridobimo le iz linka slike, ki predstavlja zastavo drzave.
-        drzava = re.search(r'">([\s\S]*?)</a></td>', vrstica) 
-        st_znack = re.search(r'<td>([\s\S]*?)</td>', vrstica)
-        procent_pridobljene_obnovljive_energije = st_znack[1]
+        drzava = ocisti_podatek(celice[0])
+        procent_pridobljene_obnovljive_energije = ocisti_podatek(celice[1])
 
         seznam_slovarjev.append({
-                'Država': drzava,
+                'Država': drzava[6:],
                 'Procent pridobljene obnovljive energije': procent_pridobljene_obnovljive_energije
             })
 
