@@ -46,7 +46,7 @@ def podatki_o_obnovljivi_energiji_po_drzavah():
 
         seznam_slovarjev.append({
                 'Država': drzava[6:],
-                'Procent pridobljene obnovljive energije': procent_pridobljene_obnovljive_energije
+                'Odstotek pridobljene obnovljive energije': procent_pridobljene_obnovljive_energije
             })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
