@@ -12,7 +12,7 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
     folder_path = os.path.join(abs_path, "..", "podatki")
     os.makedirs(folder_path, exist_ok=True)
 
-    html_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah.html")
+    html_path = os.path.join(folder_path, "najstarejsi_prebivalci_po_drzavah.html")
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(page_content)
 
@@ -106,7 +106,7 @@ def podatki_o_najstarejsih_prebivalcih_po_drzavah():
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
 
-    csv_path = os.path.join(folder_path, "nastarejsi_prebivalci_po_drzavah.csv")     
+    csv_path = os.path.join(folder_path, "najstarejsi_prebivalci_po_drzavah.csv")     
 
     if seznam_slovarjev:
         fieldnames = list(seznam_slovarjev[0].keys())

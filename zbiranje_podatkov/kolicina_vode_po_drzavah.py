@@ -3,7 +3,7 @@ import os
 import requests
 import re
 
-def podatki_o_kolicini_vode():
+def podatki_o_kolicini_vode_po_drzavah():
     url = 'https://www.worldometers.info/water/'
     prevzem = requests.get(url)
     page_content = prevzem.text
@@ -12,7 +12,7 @@ def podatki_o_kolicini_vode():
     folder_path = os.path.join(abs_path, "..", "podatki")
     os.makedirs(folder_path, exist_ok=True)
 
-    html_path = os.path.join(folder_path, "kolicina_vode.html")
+    html_path = os.path.join(folder_path, "kolicina_vode_po_drzavah.html")
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(page_content)
 
@@ -56,7 +56,7 @@ def podatki_o_kolicini_vode():
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
 
-    csv_path = os.path.join(folder_path, "kolicina_vode.csv")     
+    csv_path = os.path.join(folder_path, "kolicina_vode_po_drzavah.csv")     
 
     if seznam_slovarjev:
         fieldnames = list(seznam_slovarjev[0].keys())
@@ -70,5 +70,5 @@ def podatki_o_kolicini_vode():
         return "Ni podatkov za shranjevanje"        
         
 if __name__ == '__main__':
-    podatki_o_kolicini_vode()
+    podatki_o_kolicini_vode_po_drzavah()
     
