@@ -56,7 +56,7 @@ def podatki_o_porabi_energije_po_drzavah():
         seznam_slovarjev.append({
                 'Država': drzava,
                 'Porabljena energija na državo (letno)': poraba_energije,
-                'Procent porabe energije (svetovno)': odstotek_porabe,
+                'Odstotek porabe energije (svetovno)': odstotek_porabe.replace('%', ''),
                 'Porabljena energija na prebivalca (letno)': poraba_na_prebivalca
             })
 

@@ -52,7 +52,7 @@ def podatki_o_podhranjenosti_prebivalstva_po_drzavah():
 
         seznam_slovarjev.append({
                 'Država': drzava,
-                'Procent podhranjenega prebivalstva': procent_odhranjenega_prebivalstva
+                'Delež podhranjenega prebivalstva (v odstotkih)': procent_odhranjenega_prebivalstva.replace('%', '')
             })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.

@@ -55,13 +55,13 @@ def podatki_o_GDP_po_drzavah():
         seznam_slovarjev.append({
                 'Država': drzava,
                 # Program ne zazna predznaka minus pred odstotkom, zato to ročno dodamo.
-                'GDP rast':(
-                    GDP_rast if 'â' not in GDP_rast 
-                    else '-' + GDP_rast.replace('â', '')
+                'GDP rast (v odstotkih)':(
+                    GDP_rast.replace('%', '') if 'â' not in GDP_rast 
+                    else '-' + GDP_rast.replace('â', '').replace('%', '')
                 ),
                 'Populacija': populacija,
-                'GDP na prebivalca': GDP_na_prebivalca,
-                'Delež svetovnega GDP': delez_svetovnega_GDP
+                'GDP na prebivalca (v dolarjih)': GDP_na_prebivalca.replace('$', ''),
+                'Delež svetovnega GDP (v odstotkih)': delez_svetovnega_GDP.replace('%', '')
             })
         
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.

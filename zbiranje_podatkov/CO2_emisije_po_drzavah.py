@@ -56,13 +56,13 @@ def podatki_o_CO2_po_drzavah():
 
         seznam_slovarjev.append({
                 'Država': drzava,
-                'CO2 emisije': CO2_emisije,
-                'Letna rast (v primerjavi s preteklim letom)': (
-                    letna_rast if 'â' not in letna_rast 
-                    else '-' + letna_rast.replace('â', '')
+                'CO2 emisije (v tonah)': CO2_emisije,
+                'Letna sprememba (v odstotkih)': (
+                    letna_rast.replace('%', '') if 'â' not in letna_rast
+                    else '-' + letna_rast.replace('â', '').replace('%', '') 
                 ),
-                'CO2 emisije na prebivalca': CO2_na_prebivalca,
-                'Delež svetovnega CO2': delez_svetovnega_CO2
+                'CO2 emisije na prebivalca (v tonah)': CO2_na_prebivalca,
+                'Delež svetovnega CO2 (v odstotkih)': delez_svetovnega_CO2.replace('%', '')
             })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
