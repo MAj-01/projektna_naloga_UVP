@@ -57,7 +57,7 @@ def podatki_o_porabi_energije_po_drzavah():
                 'Država': drzava,
                 'Porabljena energija na državo (letno)': poraba_energije,
                 'Odstotek porabe energije (svetovno)': odstotek_porabe.replace('%', ''),
-                'Porabljena energija na prebivalca (letno)': poraba_na_prebivalca
+                'Porabljena energija na prebivalca (letno)': poraba_na_prebivalca.replace(',', '')
             })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
