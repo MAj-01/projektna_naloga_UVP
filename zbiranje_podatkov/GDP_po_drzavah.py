@@ -60,7 +60,7 @@ def podatki_o_GDP_po_drzavah():
                     else '-' + GDP_rast.replace('â', '').replace('%', '')
                 ),
                 'Populacija': populacija,
-                'GDP na prebivalca (v dolarjih)': GDP_na_prebivalca.replace('$', ''),
+                'GDP na prebivalca (v dolarjih)': GDP_na_prebivalca.replace('$', '').replace(',', ''),
                 'Delež svetovnega GDP (v odstotkih)': delez_svetovnega_GDP.replace('%', '')
             })
         
