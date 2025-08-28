@@ -73,5 +73,3 @@ def podatki_o_porabi_energije_po_drzavah():
     else:
         return "Ni podatkov za shranjevanje"        
         
-if __name__ == '__main__':
-    podatki_o_porabi_energije_po_drzavah()

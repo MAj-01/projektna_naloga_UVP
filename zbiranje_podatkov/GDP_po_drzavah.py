@@ -59,7 +59,7 @@ def podatki_o_GDP_po_drzavah():
                     GDP_rast.replace('%', '') if 'â' not in GDP_rast 
                     else '-' + GDP_rast.replace('â', '').replace('%', '')
                 ),
-                'Populacija': populacija,
+                'Populacija': populacija.replace(',', ''),
                 'GDP na prebivalca (v dolarjih)': GDP_na_prebivalca.replace('$', '').replace(',', ''),
                 'Delež svetovnega GDP (v odstotkih)': delez_svetovnega_GDP.replace('%', '')
             })
@@ -77,6 +77,5 @@ def podatki_o_GDP_po_drzavah():
     else:
         return "Ni podatkov za shranjevanje"        
         
-if __name__ == '__main__':
-    podatki_o_GDP_po_drzavah()
+
     

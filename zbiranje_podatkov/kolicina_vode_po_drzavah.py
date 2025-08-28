@@ -59,7 +59,7 @@ def podatki_o_kolicini_vode_po_drzavah():
         
         seznam_slovarjev.append({
             'Država': drzava,
-            'Porabljena količina vode na prebivalca (dnevno)': litri_vode_na_prebivalca
+            'Porabljena količina vode na prebivalca (dnevno)': litri_vode_na_prebivalca.replace(',', '')
         })
 
     # Funkcija nazadnje podatke iz seznama slovarjev pretvori v csv datoteko.
@@ -75,6 +75,3 @@ def podatki_o_kolicini_vode_po_drzavah():
     else:
         return "Ni podatkov za shranjevanje"        
         
-if __name__ == '__main__':
-    podatki_o_kolicini_vode_po_drzavah()
-    
